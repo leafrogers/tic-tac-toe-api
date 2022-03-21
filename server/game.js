@@ -22,17 +22,25 @@ const cellIsClaimed = (cell) => cell !== '';
 
 /**
  * @param {gameModel} game
- * @param {{ omitPlayerUuids?: boolean }} options
+ * @param {object} options
+ * @param {boolean} [options.omitPlayerUuids]
+ * @param {uuid} [options.playerUuid] If an API client knows a player UUID,
+ *  show them which player it belongs to. Helpful for inferring a player’s state.
  */
-const toPublicGame = (game, { omitPlayerUuids = true } = {}) => {
+const toPublicGame = (game, { omitPlayerUuids = true, playerUuid } = {}) => {
 	const publicBoard = Array.from(game.board.cells.values());
 	const publicGame = JSON.parse(JSON.stringify(game));
+	const [playerO, playerX] = publicGame.players;
 
 	publicGame.board.cells = publicBoard;
 
-	if (omitPlayerUuids) {
-		delete publicGame.players[0].uuid;
-		delete publicGame.players[1].uuid;
+	if (omitPlayerUuids && !playerUuid) {
+		delete playerO.uuid;
+		delete playerX.uuid;
+	} else if (omitPlayerUuids && playerUuid === playerO.uuid) {
+		delete playerX.uuid;
+	} else if (omitPlayerUuids && playerUuid === playerX.uuid) {
+		delete playerO.uuid;
 	}
 
 	return publicGame;
@@ -85,16 +93,22 @@ export const create = () => {
 
 /**
  * @param {uuid} uuidToRead
+ * @param {{playerUuid?: uuid}} options
  * @returns {gameModel | undefined}
  */
-export const read = (uuidToRead) => {
+export const read = (uuidToRead, { playerUuid } = {}) => {
 	const game = games.find(({ uuid }) => uuid === uuidToRead);
+	const options = {};
 
 	if (!game) {
 		return;
 	}
 
-	return toPublicGame(game);
+	if (typeof playerUuid === 'string' && playerUuid.length === 36) {
+		options.playerUuid = playerUuid;
+	}
+
+	return toPublicGame(game, options);
 };
 
 /**

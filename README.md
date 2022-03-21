@@ -80,8 +80,12 @@ both players’ UUIDs!
 ### `GET /api/games/:uuid`
 
 Send a GET request to `/api/games/:gameUuid` to receive the current state of your Tic-tac-toe game.
+Accepts an optional header, `Player-UUID`, if you want to include the UUID of a player in the
+response. This header is useful for inferring the state of a player, for example: if you want to
+serve an HTML page to the player, in order to infer if it’s their turn in the game, you need to know
+which of the players in the players array is actually them. In other words, sending the `Player-UUID` header lets you identify a player within the response’s players array.
 
-#### Example response
+#### Example response of a request with no optional `Player-UUID` header
 
 `200 OK`
 
@@ -100,6 +104,31 @@ Send a GET request to `/api/games/:gameUuid` to receive the current state of you
 		"isTheirTurn": false,
 		"isWinner": null,
 		"name": "Player X"
+	}],
+	"uuid": "00000000-0000-0000-0000-000000000000"
+}
+```
+
+#### Example response of a request with a `Player-UUID` header of `22222222-2222-2222-2222-222222222222`
+
+`200 OK`
+
+```json
+{
+	"board": {
+		"cells": ["", "", "", "", "", "", "", "", ""],
+		"winningIndexTrio": null
+	},
+	"hasEnded": false,
+	"players": [{
+		"isTheirTurn": true,
+		"isWinner": null,
+		"name": "Player O"
+	}, {
+		"isTheirTurn": false,
+		"isWinner": null,
+		"name": "Player X",
+		"uuid": "22222222-2222-2222-2222-222222222222"
 	}],
 	"uuid": "00000000-0000-0000-0000-000000000000"
 }
@@ -178,3 +207,4 @@ please [raise an issue](https://github.com/leafrogers/tic-tac-toe-api/issues).
 ## Licence
 
 This software is published by the Leaf Rogers under the [MIT licence](http://opensource.org/licenses/MIT).
+ 
