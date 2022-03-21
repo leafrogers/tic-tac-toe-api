@@ -4,12 +4,12 @@
 
 An API for creating and managing games of Tic-tac-toe.
 
-- [:thinking: Why does this repo exist?](#thinking-what-is-this-for)
+- [:thinking: Why does this repo exist?](#thinking-why-does-this-repo-exist)
 - [:key: API keys](#key-api-keys)
 - [:dart: Endpoints](#dart-endpoints)
 - [:warning: Requirements](#warning-requirements)
 - [:running: Running on a local machine](#running-running-on-a-local-machine)
-- [:information_source: Technical constraints](#information-source-technical-constraints)
+- [:information_source: Technical constraints](#information_source-technical-constraints)
 - [:pager: Contact](#pager-contact)
 - [Licence](#licence)
 
