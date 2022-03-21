@@ -57,6 +57,21 @@ export const handleAuth = () => {
 };
 
 /**
+ * @param {Request} _req
+ * @param {Response} _res
+ * @param {NextFunction} next
+ */
+export const onlyNonProduction = (_req, _res, next) => {
+	if (config.IS_PRODUCTION) {
+		return next(
+			new HttpError(405, 'This method or route is not allowed in production')
+		);
+	}
+
+	next();
+};
+
+/**
  * @param {Request} req
  * @param {Response} res
  */
