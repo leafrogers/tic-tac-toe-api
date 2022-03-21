@@ -24,7 +24,8 @@ app.post('/api/games', (_req, res) => {
 });
 
 app.get('/api/games/:uuid', (req, res, next) => {
-	const game = readGame(req.params.uuid);
+	const playerUuid = req.get('Player-UUID');
+	const game = readGame(req.params.uuid, { playerUuid });
 
 	if (game) {
 		return res.status(200).json({ game, status: 200 });

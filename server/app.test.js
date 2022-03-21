@@ -128,6 +128,27 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 			expect(body.game).toEqual(expectedModel);
 		});
+
+		// This lets API clients validate a player UUID, as well as identify
+		// when it’s a player’s turn next
+		it('retrieves a game and includes a player UUID if it matches with a header', async () => {
+			const playerUuidX = response.body.game.players[1].uuid;
+			const { body } = await requestWithApiKey
+				.get(`/api/games/${response.body.game.uuid}`)
+				.set('Player-UUID', playerUuidX);
+
+			const expectedPlayers = [
+				{ isTheirTurn: true, isWinner: null, name: 'Player O' },
+				{
+					isTheirTurn: false,
+					isWinner: null,
+					name: 'Player X',
+					uuid: playerUuidX
+				}
+			];
+
+			expect(body.game.players).toEqual(expectedPlayers);
+		});
 	});
 
 	describe('Valid turns', () => {
