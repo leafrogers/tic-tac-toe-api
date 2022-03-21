@@ -4,10 +4,12 @@
 
 An API for creating and managing games of Tic-tac-toe.
 
-- [:thinking: What is this for?](#thinking-what-is-this-for)
+- [:thinking: Why does this repo exist?](#thinking-what-is-this-for)
+- [:key: API keys](#key-api-keys)
 - [:dart: Endpoints](#dart-endpoints)
 - [:warning: Requirements](#warning-requirements)
-- [:running: Running locally](#running-running-locally)
+- [:running: Running on a local machine](#running-running-on-a-local-machine)
+- [:information_source: Technical constraints](#information-source-technical-constraints)
 - [:pager: Contact](#pager-contact)
 - [Licence](#licence)
 
@@ -19,32 +21,160 @@ use it a playground for learning different web stacks, and for general tinkering
 Please do feel free to use this code, add GitHub issues, or open PRs, but know
 that you may not get a timely response.
 
+## :key: API keys
+
+In order to call any of this API’s endpoints, you’ll need to have an API key and to send it via an
+`API-Key` header with all your HTTP requests.
+
+If you’re running this repo’s code in an environment you control:
+
+1. Generate an API key that is likely to be unique, like a v4 UUID. A simple way to do this is by
+   running `npx uuid` and copying the output
+2. Add the generated key to an `API_KEYS` environment variable, as a comma-separated string. For
+   example, if
+   `API_KEYS` already exists with a value of `example-key-1`, and you’ve generated a new key as
+   `example-key-2`, change the `API_KEYS` value to be `example-key-1,example-key-2`.
+
+If you’re not in control of the environment running this repo’s code, find out who has access and
+ask them to generate an API key for you.
+
 ## :dart: Endpoints
 
-TBC
+### `POST /api/games`
+
+Send a POST request to `/api/games` and a new Tic-tac-toe game will be created.
+No request body is required or supported. The response body will be in JSON format.
+
+#### Example response
+
+`201 Created`
+
+```json
+{
+	"board": {
+		"cells": ["", "", "", "", "", "", "", "", ""],
+		"winningIndexTrio": null
+	},
+	"hasEnded": false,
+	"players": [{
+		"isTheirTurn": true,
+		"isWinner": null,
+		"name": "Player O",
+		"uuid": "11111111-1111-1111-1111-111111111111"
+	}, {
+		"isTheirTurn": false,
+		"isWinner": null,
+		"name": "Player X",
+		"uuid": "22222222-2222-2222-2222-222222222222"
+	}],
+	"uuid": "00000000-0000-0000-0000-000000000000"
+}
+```
+
+Make note of the players’ UUIDs from the POST response: you’ll need these to validate a turn later,
+because player UUIDs are omitted from any subsequent responses. This mechanism is intended to provide
+rudementary authentication of turns, while keeping the API simple. Think of a player UUID as an
+API key for that player. The downside is that whoever creates the game must be trusted to know
+both players’ UUIDs!
+
+### `GET /api/games/:uuid`
+
+Send a GET request to `/api/games/:gameUuid` to receive the current state of your Tic-tac-toe game.
+
+#### Example response
+
+`200 OK`
+
+```json
+{
+	"board": {
+		"cells": ["", "", "", "", "", "", "", "", ""],
+		"winningIndexTrio": null
+	},
+	"hasEnded": false,
+	"players": [{
+		"isTheirTurn": true,
+		"isWinner": null,
+		"name": "Player O"
+	}, {
+		"isTheirTurn": false,
+		"isWinner": null,
+		"name": "Player X"
+	}],
+	"uuid": "00000000-0000-0000-0000-000000000000"
+}
+```
+
+### `POST /api/games/:gameUuid/turn`
+
+Calls to `/api/games/:gameUuid/turn` will change the state of the game board by taking the requested player’s turn in the game. If a successful response is returned, it will then be the other player’s turn.
+
+#### Example request
+
+
+```json
+{
+	"cellToClaim": 3,
+	"playerUuid": "11111111-1111-1111-1111-111111111111"
+}
+```
+
+`cellToClaim` should be an integer from 0 through 8, where cells `0`, `1`, and `2` are the first row, `3`, `4`, and `5` are the second, and `6`, `7`, and `8` represent cells from the third row.
+
+`playerUuid` should be the UUID of the player taking a turn. Player UUIDs were given on creation of the game.
+
+#### Example response
+
+`200 OK`
+
+```json
+{
+	"board": {
+		"cells": ["", "", "", "O", "", "", "", "", ""],
+		"winningIndexTrio": null
+	},
+	"hasEnded": false,
+	"players": [{
+		"isTheirTurn": false,
+		"isWinner": null,
+		"name": "Player O"
+	}, {
+		"isTheirTurn": true,
+		"isWinner": null,
+		"name": "Player X"
+	}],
+	"uuid": "00000000-0000-0000-0000-000000000000"
+}
+```
 
 ## :warning: Requirements
 
-This app requires the following to be installed to be able to run locally.
+This code has only been tested on macOS locally and Linux via CI, but it _should_ also work on Windows.
+
+This API requires the following to be installed in order to be able to run it on your local machine.
 
 - [Node](https://www.nodejs.org) (version 16.x.x)
 
-## :running: Running locally
+## :running: Running on a local machine
 
 Steps:
 
 - Clone this repo to a local directory
-- In your terminal, run `npm install`
+- In your terminal, navigate to the directory and run `npm install`
 - After that’s finished, run `npm start`
-- Go to the URL that’s logged in the console output
+- Using the URL that’s logged in the console output, you should be able to make requests via something like Postman, Insomnia, cURL, or similar tools.
 
-### :pager: Contact
+## :information_source: Technical constraints
+
+This API stores games in memory rather than in a dedicated database, in order to keep the architecture simple. It was designed to run on a free [Heroku](https://www.heroku.com/home) dyno with the assumption that when hosted, the service running this code will be periodically restarted. If you’re hosting this API somewhere other than Heroku and that service doesn’t periodically restart your app, be aware that your games array will grow until NodeJS runs out of memory.
+
+## :pager: Contact
 
 If you have any questions or comments about this app, or need help using it,
 please [raise an issue](https://github.com/leafrogers/tic-tac-toe-api/issues).
 
 ---
 
-### Licence
+## Licence
 
 This software is published by the Leaf Rogers under the [MIT licence](http://opensource.org/licenses/MIT).
