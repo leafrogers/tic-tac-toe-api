@@ -134,7 +134,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 		/**
 		 * @type {string}
 		 */
-		let uuid;
+		let gameUuid;
 		/**
 		 * @type {string}
 		 */
@@ -146,18 +146,18 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 		beforeEach(async () => {
 			const { body } = await requestWithApiKey.post('/api/games');
-			uuid = body.game.uuid;
+			gameUuid = body.game.uuid;
 			playerUuidO = body.game.players[0].uuid;
 			playerUuidX = body.game.players[1].uuid;
 		});
 
 		afterEach(async () => {
-			await requestWithApiKey.delete(`/api/games/${uuid}`);
+			await requestWithApiKey.delete(`/api/games/${gameUuid}`);
 		});
 
 		it('allows a valid turn', async () => {
 			const { status } = await requestWithApiKey
-				.post(`/api/games/${uuid}/turn`)
+				.post(`/api/games/${gameUuid}/turn`)
 				.send({ cellToClaim: 0, playerUuid: playerUuidO });
 
 			expect(status).toBe(200);
@@ -165,7 +165,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 		it('serves the updated game in the response body', async () => {
 			const { body } = await requestWithApiKey
-				.post(`/api/games/${uuid}/turn`)
+				.post(`/api/games/${gameUuid}/turn`)
 				.send({ cellToClaim: 0, playerUuid: playerUuidO });
 
 			expect(body.game.board.cells).toEqual([
@@ -183,10 +183,10 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 		it('returns the expected change to the game board', async () => {
 			await requestWithApiKey
-				.post(`/api/games/${uuid}/turn`)
+				.post(`/api/games/${gameUuid}/turn`)
 				.send({ cellToClaim: 0, playerUuid: playerUuidO });
 
-			const { body } = await requestWithApiKey.get(`/api/games/${uuid}`);
+			const { body } = await requestWithApiKey.get(`/api/games/${gameUuid}`);
 
 			expect(body.game.board.cells).toEqual([
 				'O',
@@ -205,15 +205,15 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 			// New games always start with player O first, so take their turn
 			// to then make it player X’s turn for this test
 			await requestWithApiKey
-				.post(`/api/games/${uuid}/turn`)
+				.post(`/api/games/${gameUuid}/turn`)
 				.send({ cellToClaim: 0, playerUuid: playerUuidO });
 
 			// Now it’s player X’s turn
 			await requestWithApiKey
-				.post(`/api/games/${uuid}/turn`)
+				.post(`/api/games/${gameUuid}/turn`)
 				.send({ cellToClaim: 2, playerUuid: playerUuidX });
 
-			const { body } = await requestWithApiKey.get(`/api/games/${uuid}`);
+			const { body } = await requestWithApiKey.get(`/api/games/${gameUuid}`);
 
 			expect(body.game.board.cells).toEqual([
 				'O',
@@ -589,7 +589,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 		/**
 		 * @type {string}
 		 */
-		let uuid;
+		let gameUuid;
 		/**
 		 * @type {string}
 		 */
@@ -601,13 +601,13 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 		beforeEach(async () => {
 			const { body } = await requestWithApiKey.post('/api/games');
-			uuid = body.game.uuid;
+			gameUuid = body.game.uuid;
 			playerUuidO = body.game.players[0].uuid;
 			playerUuidX = body.game.players[1].uuid;
 		});
 
 		afterEach(async () => {
-			await requestWithApiKey.delete(`/api/games/${uuid}`);
+			await requestWithApiKey.delete(`/api/games/${gameUuid}`);
 		});
 
 		it('includes an array of the winning cell indexes after a win', async () => {
@@ -619,13 +619,13 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				['O', 2]
 			]) {
 				const [player, cellToClaim] = turn;
-				await requestWithApiKey.post(`/api/games/${uuid}/turn`).send({
+				await requestWithApiKey.post(`/api/games/${gameUuid}/turn`).send({
 					cellToClaim,
 					playerUuid: player === 'O' ? playerUuidO : playerUuidX
 				});
 			}
 
-			const { body } = await requestWithApiKey.get(`/api/games/${uuid}`);
+			const { body } = await requestWithApiKey.get(`/api/games/${gameUuid}`);
 
 			expect(body.game.board).toEqual({
 				cells: ['O', 'O', 'O', 'X', 'X', '', '', '', ''],
@@ -642,13 +642,13 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				['O', 2]
 			]) {
 				const [player, cellToClaim] = turn;
-				await requestWithApiKey.post(`/api/games/${uuid}/turn`).send({
+				await requestWithApiKey.post(`/api/games/${gameUuid}/turn`).send({
 					cellToClaim,
 					playerUuid: player === 'O' ? playerUuidO : playerUuidX
 				});
 			}
 
-			const { body } = await requestWithApiKey.get(`/api/games/${uuid}`);
+			const { body } = await requestWithApiKey.get(`/api/games/${gameUuid}`);
 
 			expect(body.game.players[0].isWinner).toBe(true);
 		});
@@ -659,16 +659,16 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 		/**
 		 * @type {string}
 		 */
-		let uuid;
+		let gameUuid;
 
 		beforeEach(async () => {
 			const { body } = await requestWithApiKey.post('/api/games');
-			uuid = body.game.uuid;
+			gameUuid = body.game.uuid;
 		});
 
 		afterEach(async () => {
 			config.IS_PRODUCTION = false;
-			await requestWithApiKey.delete(`/api/games/${uuid}`);
+			await requestWithApiKey.delete(`/api/games/${gameUuid}`);
 			config.IS_PRODUCTION = originalIsProduction;
 		});
 
@@ -677,7 +677,9 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 		it('serves a delete route if not in production', async () => {
 			config.IS_PRODUCTION = false;
 
-			const { status } = await requestWithApiKey.delete(`/api/games/${uuid}`);
+			const { status } = await requestWithApiKey.delete(
+				`/api/games/${gameUuid}`
+			);
 
 			expect(status).toEqual(204);
 		});
@@ -685,8 +687,8 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 		it('deletes a game if not in production', async () => {
 			config.IS_PRODUCTION = false;
 
-			await requestWithApiKey.delete(`/api/games/${uuid}`);
-			const { status } = await requestWithApiKey.get(`/api/games/${uuid}`);
+			await requestWithApiKey.delete(`/api/games/${gameUuid}`);
+			const { status } = await requestWithApiKey.get(`/api/games/${gameUuid}`);
 
 			expect(status).toEqual(404);
 		});
@@ -694,7 +696,9 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 		it('doesn’t serve a delete route if in production', async () => {
 			config.IS_PRODUCTION = true;
 
-			const { status } = await requestWithApiKey.delete(`/api/games/${uuid}`);
+			const { status } = await requestWithApiKey.delete(
+				`/api/games/${gameUuid}`
+			);
 
 			expect(status).toEqual(405);
 		});
@@ -702,9 +706,9 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 		it('doesn’t delete a game if in production', async () => {
 			config.IS_PRODUCTION = true;
 
-			await requestWithApiKey.delete(`/api/games/${uuid}`);
+			await requestWithApiKey.delete(`/api/games/${gameUuid}`);
 
-			const { status } = await requestWithApiKey.get(`/api/games/${uuid}`);
+			const { status } = await requestWithApiKey.get(`/api/games/${gameUuid}`);
 
 			expect(status).toEqual(200);
 		});
