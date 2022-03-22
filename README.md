@@ -16,7 +16,7 @@ An API for creating and managing games of Tic-tac-toe.
 ## :thinking: Why does this repo exist?
 
 This repo exists so that the [the author](https://github.com/leafrogers) can
-use it a playground for learning different web stacks, and for general tinkering.
+use it as a playground for learning different web stacks, and for general tinkering.
 
 Please do feel free to use this code, add GitHub issues, or open PRs, but know
 that you may not get a timely response.
