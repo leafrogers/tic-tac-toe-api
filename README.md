@@ -60,32 +60,32 @@ No request body is required or supported. The response body will be in JSON form
 		"isTheirTurn": true,
 		"isWinner": null,
 		"name": "Player O",
-		"uuid": "11111111-1111-1111-1111-111111111111"
+		"id": "11111"
 	}, {
 		"isTheirTurn": false,
 		"isWinner": null,
 		"name": "Player X",
-		"uuid": "22222222-2222-2222-2222-222222222222"
+		"id": "22222"
 	}],
-	"uuid": "00000000-0000-0000-0000-000000000000"
+	"id": "00000"
 }
 ```
 
-Make note of the players’ UUIDs from the POST response: you’ll need these to validate a turn later,
-because player UUIDs are omitted from any subsequent responses. This mechanism is intended to provide
-rudementary authentication of turns, while keeping the API simple. Think of a player UUID as an
+Make note of the players’ IDs from the POST response: you’ll need these to validate a turn later,
+because player IDs are omitted from any subsequent responses. This mechanism is intended to provide
+rudementary authentication of turns, while keeping the API simple. Think of a player ID as an
 API key for that player. The downside is that whoever creates the game must be trusted to know
-both players’ UUIDs!
+both players’ IDs!
 
-### `GET /api/games/:uuid`
+### `GET /api/games/:gameId`
 
-Send a GET request to `/api/games/:gameUuid` to receive the current state of your Tic-tac-toe game.
-Accepts an optional header, `Player-UUID`, if you want to include the UUID of a player in the
+Send a GET request to `/api/games/:gameId` to receive the current state of your Tic-tac-toe game.
+Accepts an optional header, `Player-ID`, if you want to include the ID of a player in the
 response. This header is useful for inferring the state of a player, for example: if you want to
 serve an HTML page to the player, in order to infer if it’s their turn in the game, you need to know
-which of the players in the players array is actually them. In other words, sending the `Player-UUID` header lets you identify a player within the response’s players array.
+which of the players in the players array is actually them. In other words, sending the `Player-ID` header lets you identify a player within the response’s players array.
 
-#### Example response of a request with no optional `Player-UUID` header
+#### Example response of a request with no optional `Player-ID` header
 
 `200 OK`
 
@@ -105,11 +105,11 @@ which of the players in the players array is actually them. In other words, send
 		"isWinner": null,
 		"name": "Player X"
 	}],
-	"uuid": "00000000-0000-0000-0000-000000000000"
+	"id": "00000"
 }
 ```
 
-#### Example response of a request with a `Player-UUID` header of `22222222-2222-2222-2222-222222222222`
+#### Example response of a request with a `Player-ID` header of `22222`
 
 `200 OK`
 
@@ -128,15 +128,15 @@ which of the players in the players array is actually them. In other words, send
 		"isTheirTurn": false,
 		"isWinner": null,
 		"name": "Player X",
-		"uuid": "22222222-2222-2222-2222-222222222222"
+		"id": "22222"
 	}],
-	"uuid": "00000000-0000-0000-0000-000000000000"
+	"id": "00000"
 }
 ```
 
-### `POST /api/games/:gameUuid/turn`
+### `POST /api/games/:gameId/turn`
 
-Calls to `/api/games/:gameUuid/turn` will change the state of the game board by taking the requested player’s turn in the game. Requests must include a `Content-Type` header with a value of `application/json`. If a successful response is returned, it will then be the other player’s turn.
+Calls to `/api/games/:gameId/turn` will change the state of the game board by taking the requested player’s turn in the game. Requests must include a `Content-Type` header with a value of `application/json`. If a successful response is returned, it will then be the other player’s turn.
 
 #### Example request
 
@@ -144,13 +144,13 @@ Calls to `/api/games/:gameUuid/turn` will change the state of the game board by 
 ```json
 {
 	"cellToClaim": 3,
-	"playerUuid": "11111111-1111-1111-1111-111111111111"
+	"playerId": "11111"
 }
 ```
 
 `cellToClaim` should be an integer from 0 through 8, where cells `0`, `1`, and `2` are the first row, `3`, `4`, and `5` are the second, and `6`, `7`, and `8` represent cells from the third row.
 
-`playerUuid` should be the UUID of the player taking a turn. Player UUIDs were given on creation of the game.
+`playerId` should be the ID of the player taking a turn. Player IDs were given on creation of the game.
 
 #### Example response
 
@@ -172,7 +172,7 @@ Calls to `/api/games/:gameUuid/turn` will change the state of the game board by 
 		"isWinner": null,
 		"name": "Player X"
 	}],
-	"uuid": "00000000-0000-0000-0000-000000000000"
+	"id": "00000"
 }
 ```
 

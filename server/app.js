@@ -24,9 +24,9 @@ app.post('/api/games', (_req, res) => {
 	res.status(201).json({ game: newGame, status: 201 });
 });
 
-app.get('/api/games/:gameUuid', (req, res, next) => {
-	const playerUuid = req.get('Player-UUID');
-	const game = readGame(req.params.gameUuid, { playerUuid });
+app.get('/api/games/:gameId', (req, res, next) => {
+	const playerId = req.get('Player-ID');
+	const game = readGame(req.params.gameId, { playerId });
 
 	if (game) {
 		return res.status(200).json({ game, status: 200 });
@@ -35,8 +35,8 @@ app.get('/api/games/:gameUuid', (req, res, next) => {
 	next();
 });
 
-app.delete('/api/games/:gameUuid', onlyNonProduction, (req, res, next) => {
-	const isDeleted = removeGame(req.params.gameUuid);
+app.delete('/api/games/:gameId', onlyNonProduction, (req, res, next) => {
+	const isDeleted = removeGame(req.params.gameId);
 
 	if (isDeleted) {
 		return res.sendStatus(204);
@@ -45,10 +45,9 @@ app.delete('/api/games/:gameUuid', onlyNonProduction, (req, res, next) => {
 	next();
 });
 
-app.post('/api/games/:gameUuid/turn', express.json(), (req, res, next) => {
-	console.log({ body: req.body });
-	const { cellToClaim, playerUuid } = req.body;
-	const game = readGame(req.params.gameUuid);
+app.post('/api/games/:gameId/turn', express.json(), (req, res, next) => {
+	const { cellToClaim, playerId } = req.body;
+	const game = readGame(req.params.gameId);
 
 	if (!game) {
 		return next();
@@ -58,9 +57,9 @@ app.post('/api/games/:gameUuid/turn', express.json(), (req, res, next) => {
 		game: updatedGame,
 		isUpdated,
 		message
-	} = updateGame(req.params.gameUuid, {
+	} = updateGame(req.params.gameId, {
 		cellToClaim,
-		playerUuid
+		playerId
 	});
 
 	if (isUpdated) {
@@ -78,9 +77,9 @@ app.post('/api/games/:gameUuid/turn', express.json(), (req, res, next) => {
 
 	logger.warn({
 		event: 'BAD_REQUEST',
-		gameUuid: req.params.gameUuid,
+		gameId: req.params.gameId,
 		cellToClaim,
-		playerUuid,
+		playerId,
 		...body
 	});
 
