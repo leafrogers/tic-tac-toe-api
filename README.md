@@ -56,18 +56,21 @@ No request body is required or supported. The response body will be in JSON form
 		"winningIndexTrio": null
 	},
 	"hasEnded": false,
+	"id": "00000",
+	"nextId": null,
 	"players": [{
 		"isTheirTurn": true,
 		"isWinner": null,
 		"name": "Player O",
+		"nextId": null
 		"id": "11111"
 	}, {
 		"isTheirTurn": false,
 		"isWinner": null,
 		"name": "Player X",
+		"nextId": null
 		"id": "22222"
 	}],
-	"id": "00000"
 }
 ```
 
@@ -96,16 +99,19 @@ which of the players in the players array is actually them. In other words, send
 		"winningIndexTrio": null
 	},
 	"hasEnded": false,
+	"id": "00000",
+	"nextId": null,
 	"players": [{
 		"isTheirTurn": true,
 		"isWinner": null,
-		"name": "Player O"
+		"name": "Player O",
+		"nextId": null,
 	}, {
 		"isTheirTurn": false,
 		"isWinner": null,
-		"name": "Player X"
+		"name": "Player X",
+		"nextId": null
 	}],
-	"id": "00000"
 }
 ```
 
@@ -120,23 +126,30 @@ which of the players in the players array is actually them. In other words, send
 		"winningIndexTrio": null
 	},
 	"hasEnded": false,
+	"id": "00000",
+	"nextId": null,
 	"players": [{
 		"isTheirTurn": true,
 		"isWinner": null,
-		"name": "Player O"
+		"name": "Player O",
+		"nextId": null
 	}, {
+		"id": "22222",
 		"isTheirTurn": false,
 		"isWinner": null,
 		"name": "Player X",
-		"id": "22222"
+		"nextId": null
 	}],
-	"id": "00000"
 }
 ```
 
 ### `POST /api/games/:gameId/turn`
 
-Calls to `/api/games/:gameId/turn` will change the state of the game board by taking the requested player’s turn in the game. Requests must include a `Content-Type` header with a value of `application/json`. If a successful response is returned, it will then be the other player’s turn.
+Calls to `/api/games/:gameId/turn` will change the state of the game board by taking the requested player’s turn in the game. Requests must include a `Content-Type` header with a value of `application/json`. If a successful response is returned, it will then be the other player’s turn unless you win, or there are no more spaces left on the board.
+
+:information_source: When a game ends, a new game is created automatically and its IDs are shared in
+any subsequent responses via a `nextId` property, with the same mechanism in place that omits player IDs unless you specify one with a `Player-ID` header in the request. This approach of perpetually creating subsequent games makes it possible for two players to continue playing each other across multiple games,
+without having to share new URLs between each other.
 
 #### Example request
 
@@ -163,16 +176,19 @@ Calls to `/api/games/:gameId/turn` will change the state of the game board by ta
 		"winningIndexTrio": null
 	},
 	"hasEnded": false,
+	"id": "00000",
+	"nextId": null,
 	"players": [{
 		"isTheirTurn": false,
 		"isWinner": null,
-		"name": "Player O"
+		"name": "Player O",
+		"nextId": null
 	}, {
 		"isTheirTurn": true,
 		"isWinner": null,
 		"name": "Player X"
-	}],
-	"id": "00000"
+		"nextId": null
+	}]
 }
 ```
 

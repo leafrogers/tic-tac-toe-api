@@ -84,18 +84,21 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				},
 				hasEnded: false,
 				id: expect.stringMatching(idRegEx),
+				nextId: null,
 				players: [
 					{
 						id: expect.stringMatching(idRegEx),
 						isTheirTurn: true,
 						isWinner: null,
-						name: 'Player O'
+						name: 'Player O',
+						nextId: null
 					},
 					{
 						id: expect.stringMatching(idRegEx),
 						isTheirTurn: false,
 						isWinner: null,
-						name: 'Player X'
+						name: 'Player X',
+						nextId: null
 					}
 				]
 			});
@@ -113,6 +116,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				},
 				hasEnded: false,
 				id: response.body.game.id,
+				nextId: null,
 				players: [
 					// Player O always starts first
 					{ isTheirTurn: true, isWinner: null, name: 'Player O' },
@@ -137,7 +141,8 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 					id: playerIdX,
 					isTheirTurn: false,
 					isWinner: null,
-					name: 'Player X'
+					name: 'Player X',
+					nextId: null
 				}
 			];
 
@@ -664,6 +669,81 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 			const { body } = await requestWithApiKey.get(`/api/games/${gameId}`);
 
 			expect(body.game.players[0].isWinner).toBe(true);
+		});
+
+		it('produces a new game and shares a player-specific URL for player O', async () => {
+			await playGameStartToFinish({ gameId, playerIdO, playerIdX });
+
+			const { body } = await requestWithApiKey
+				.get(`/api/games/${gameId}`)
+				.set('Player-ID', playerIdO);
+
+			const nextGameId = body.game.nextId;
+			const nextPlayerId = body.game.players[0].nextId;
+			const { body: newBody } = await requestWithApiKey
+				.get(`/api/games/${nextGameId}`)
+				.set('Player-ID', nextPlayerId);
+
+			expect(newBody.game).toEqual({
+				board: {
+					cells: ['', '', '', '', '', '', '', '', ''],
+					winningIndexTrio: null
+				},
+				hasEnded: false,
+				nextId: null,
+				players: [
+					{
+						id: nextPlayerId,
+						isTheirTurn: true,
+						isWinner: null,
+						name: 'Player O',
+						nextId: null
+					},
+					{
+						isTheirTurn: false,
+						isWinner: null,
+						name: 'Player X'
+					}
+				],
+				id: nextGameId
+			});
+		});
+
+		it('produces a new game and shares a player-specific URL for player X', async () => {
+			await playGameStartToFinish({ gameId, playerIdO, playerIdX });
+
+			const { body } = await requestWithApiKey
+				.get(`/api/games/${gameId}`)
+				.set('Player-ID', playerIdX);
+			const nextGameId = body.game.nextId;
+			const nextPlayerId = body.game.players[1].nextId;
+			const { body: newBody } = await requestWithApiKey
+				.get(`/api/games/${nextGameId}`)
+				.set('Player-ID', nextPlayerId);
+
+			expect(newBody.game).toEqual({
+				board: {
+					cells: ['', '', '', '', '', '', '', '', ''],
+					winningIndexTrio: null
+				},
+				hasEnded: false,
+				nextId: null,
+				players: [
+					{
+						isTheirTurn: true,
+						isWinner: null,
+						name: 'Player O'
+					},
+					{
+						id: nextPlayerId,
+						isTheirTurn: false,
+						isWinner: null,
+						name: 'Player X',
+						nextId: null
+					}
+				],
+				id: nextGameId
+			});
 		});
 	});
 
