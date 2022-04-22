@@ -1,5 +1,6 @@
 import express from 'express';
 import helmet from 'helmet';
+import logger from './logger.js';
 import {
 	handleAuth,
 	handleErrors,
@@ -23,9 +24,9 @@ app.post('/api/games', (_req, res) => {
 	res.status(201).json({ game: newGame, status: 201 });
 });
 
-app.get('/api/games/:uuid', (req, res, next) => {
+app.get('/api/games/:gameUuid', (req, res, next) => {
 	const playerUuid = req.get('Player-UUID');
-	const game = readGame(req.params.uuid, { playerUuid });
+	const game = readGame(req.params.gameUuid, { playerUuid });
 
 	if (game) {
 		return res.status(200).json({ game, status: 200 });
@@ -34,8 +35,8 @@ app.get('/api/games/:uuid', (req, res, next) => {
 	next();
 });
 
-app.delete('/api/games/:uuid', onlyNonProduction, (req, res, next) => {
-	const isDeleted = removeGame(req.params.uuid);
+app.delete('/api/games/:gameUuid', onlyNonProduction, (req, res, next) => {
+	const isDeleted = removeGame(req.params.gameUuid);
 
 	if (isDeleted) {
 		return res.sendStatus(204);
@@ -44,9 +45,10 @@ app.delete('/api/games/:uuid', onlyNonProduction, (req, res, next) => {
 	next();
 });
 
-app.post('/api/games/:uuid/turn', express.json(), (req, res, next) => {
+app.post('/api/games/:gameUuid/turn', express.json(), (req, res, next) => {
+	console.log({ body: req.body });
 	const { cellToClaim, playerUuid } = req.body;
-	const game = readGame(req.params.uuid);
+	const game = readGame(req.params.gameUuid);
 
 	if (!game) {
 		return next();
@@ -56,7 +58,7 @@ app.post('/api/games/:uuid/turn', express.json(), (req, res, next) => {
 		game: updatedGame,
 		isUpdated,
 		message
-	} = updateGame(req.params.uuid, {
+	} = updateGame(req.params.gameUuid, {
 		cellToClaim,
 		playerUuid
 	});
@@ -68,11 +70,21 @@ app.post('/api/games/:uuid/turn', express.json(), (req, res, next) => {
 		});
 	}
 
-	return res.status(400).json({
+	const body = {
 		game: null,
 		message,
 		status: 400
+	};
+
+	logger.warn({
+		event: 'BAD_REQUEST',
+		gameUuid: req.params.gameUuid,
+		cellToClaim,
+		playerUuid,
+		...body
 	});
+
+	return res.status(400).json(body);
 });
 
 app.use(handleNotFound);

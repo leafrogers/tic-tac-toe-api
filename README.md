@@ -136,7 +136,7 @@ which of the players in the players array is actually them. In other words, send
 
 ### `POST /api/games/:gameUuid/turn`
 
-Calls to `/api/games/:gameUuid/turn` will change the state of the game board by taking the requested player’s turn in the game. If a successful response is returned, it will then be the other player’s turn.
+Calls to `/api/games/:gameUuid/turn` will change the state of the game board by taking the requested player’s turn in the game. Requests must include a `Content-Type` header with a value of `application/json`. If a successful response is returned, it will then be the other player’s turn.
 
 #### Example request
 
