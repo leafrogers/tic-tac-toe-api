@@ -12,7 +12,7 @@
     "start:dev": "nodemon",
     "test": "npm run -s lint && npm run -s jest",
     "test:watch": "npm run -s jest -- --watch",
-    "postinstall": "husky install"
+    "postinstall": "if test \"$NODE_ENV\" != \"production\"; then husky install; fi"
   },
   "type": "module",
   "repository": {
