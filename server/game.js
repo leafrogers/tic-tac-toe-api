@@ -167,7 +167,7 @@ export const update = (uuidToUpdate, { cellToClaim, playerUuid }) => {
 		player.isWinner = true;
 	}
 
-	return { game: toPublicGame(game), isUpdated: true };
+	return { game: toPublicGame(game, { playerUuid }), isUpdated: true };
 };
 
 /**
