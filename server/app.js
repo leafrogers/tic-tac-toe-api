@@ -1,5 +1,6 @@
 import express from 'express';
 import helmet from 'helmet';
+import logger from './logger.js';
 import {
 	handleAuth,
 	handleErrors,
@@ -68,11 +69,21 @@ app.post('/api/games/:uuid/turn', express.json(), (req, res, next) => {
 		});
 	}
 
-	return res.status(400).json({
+	const body = {
 		game: null,
 		message,
 		status: 400
+	};
+
+	logger.warn({
+		event: 'BAD_REQUEST',
+		gameUuid: req.params.gameUuid,
+		cellToClaim,
+		playerUuid,
+		...body
 	});
+
+	return res.status(400).json(body);
 });
 
 app.use(handleNotFound);
