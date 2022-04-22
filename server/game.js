@@ -1,4 +1,7 @@
-import { randomUUID } from 'crypto';
+import ShortUniqueId from 'short-unique-id';
+import config from '../config.js';
+
+const createId = new ShortUniqueId({ length: config.ID_LENGTH });
 
 /**
  * @type {gameModel[]} games
@@ -23,24 +26,24 @@ const cellIsClaimed = (cell) => cell !== '';
 /**
  * @param {gameModel} game
  * @param {object} options
- * @param {boolean} [options.omitPlayerUuids]
- * @param {uuid} [options.playerUuid] If an API client knows a player UUID,
+ * @param {boolean} [options.omitPlayerIds]
+ * @param {id} [options.playerId] If an API client knows a player ID,
  *  show them which player it belongs to. Helpful for inferring a player’s state.
  */
-const toPublicGame = (game, { omitPlayerUuids = true, playerUuid } = {}) => {
+const toPublicGame = (game, { omitPlayerIds = true, playerId } = {}) => {
 	const publicBoard = Array.from(game.board.cells.values());
 	const publicGame = JSON.parse(JSON.stringify(game));
 	const [playerO, playerX] = publicGame.players;
 
 	publicGame.board.cells = publicBoard;
 
-	if (omitPlayerUuids && !playerUuid) {
-		delete playerO.uuid;
-		delete playerX.uuid;
-	} else if (omitPlayerUuids && playerUuid === playerO.uuid) {
-		delete playerX.uuid;
-	} else if (omitPlayerUuids && playerUuid === playerX.uuid) {
-		delete playerO.uuid;
+	if (omitPlayerIds && !playerId) {
+		delete playerO.id;
+		delete playerX.id;
+	} else if (omitPlayerIds && playerId === playerO.id) {
+		delete playerX.id;
+	} else if (omitPlayerIds && playerId === playerX.id) {
+		delete playerO.id;
 	}
 
 	return publicGame;
@@ -71,60 +74,65 @@ export const create = () => {
 		hasEnded: false,
 		players: [
 			{
+				id: createId(),
 				isTheirTurn: true,
 				isWinner: null,
-				name: 'Player O',
-				uuid: randomUUID()
+				name: 'Player O'
 			},
 			{
+				id: createId(),
 				isTheirTurn: false,
 				isWinner: null,
-				name: 'Player X',
-				uuid: randomUUID()
+				name: 'Player X'
 			}
 		],
-		uuid: randomUUID()
+		id: createId()
 	};
 
 	games.push(game);
 
-	return toPublicGame(game, { omitPlayerUuids: false });
+	return toPublicGame(game, { omitPlayerIds: false });
 };
 
 /**
- * @param {uuid} uuidToRead
- * @param {{playerUuid?: uuid}} options
+ * @param {id} idToRead
+ * @param {{playerId?: id}} options
  * @returns {gameModel | undefined}
  */
-export const read = (uuidToRead, { playerUuid } = {}) => {
-	const game = games.find(({ uuid }) => uuid === uuidToRead);
+export const read = (idToRead, { playerId } = {}) => {
+	const game = games.find(({ id }) => id === idToRead);
 	const options = {};
 
 	if (!game) {
 		return;
 	}
 
-	if (typeof playerUuid === 'string' && playerUuid.length === 36) {
-		options.playerUuid = playerUuid;
+	if (
+		typeof playerId === 'string' &&
+		// TODO: Will need some thought if it ever becomes important to preserve
+		// backwards compatibility with varying ID lengths, for any in-progress games
+		playerId.length === config.ID_LENGTH
+	) {
+		options.playerId = playerId;
 	}
 
 	return toPublicGame(game, options);
 };
 
 /**
- * @param {uuid} uuidToUpdate
+ * @param {id} idToUpdate
  * @param {turnModel} turnData
  * @returns {responseFromUpdate}
  */
-export const update = (uuidToUpdate, { cellToClaim, playerUuid }) => {
-	const game = games.find(({ uuid }) => uuid === uuidToUpdate);
+export const update = (idToUpdate, { cellToClaim, playerId }) => {
+	const game = games.find(({ id }) => id === idToUpdate);
 
 	if (!game) {
 		return { isUpdated: false, message: 'Game not found' };
 	}
 
 	const { board, players } = game;
-	const player = players.find((player) => player.uuid === playerUuid);
+	const player = players.find((player) => player.id === playerId);
 	const { hasEnded } = judgeBoard(board);
 	const isValidCellNumber =
 		typeof cellToClaim === 'number' && cellToClaim >= 0 && cellToClaim <= 8;
@@ -152,7 +160,7 @@ export const update = (uuidToUpdate, { cellToClaim, playerUuid }) => {
 		return { isUpdated: false, message: errorMessages.join('; ') };
 	}
 
-	board.cells.set(cellToClaim, playerUuid === players[0].uuid ? 'O' : 'X');
+	board.cells.set(cellToClaim, playerId === players[0].id ? 'O' : 'X');
 	players[0].isTheirTurn = !players[0].isTheirTurn;
 	players[1].isTheirTurn = !players[1].isTheirTurn;
 
@@ -167,15 +175,15 @@ export const update = (uuidToUpdate, { cellToClaim, playerUuid }) => {
 		player.isWinner = true;
 	}
 
-	return { game: toPublicGame(game, { playerUuid }), isUpdated: true };
+	return { game: toPublicGame(game, { playerId }), isUpdated: true };
 };
 
 /**
- * @param {uuid} uuidToRemove
+ * @param {id} idToRemove
  * @returns {boolean} True if removed, otherwise false
  */
-export const remove = (uuidToRemove) => {
-	const gameIndex = games.findIndex(({ uuid }) => uuid === uuidToRemove);
+export const remove = (idToRemove) => {
+	const gameIndex = games.findIndex(({ id }) => id === idToRemove);
 
 	if (gameIndex > -1) {
 		games.splice(gameIndex, 1);
@@ -231,7 +239,7 @@ const judgeBoard = (board) => {
 /**
  * @typedef {0|1|2|3|4|5|6|7|8} cellNumber
  * @typedef {'X'|'O'|''} cellValue
- * @typedef {string} uuid
+ * @typedef {string} id
  *
  * @typedef boardModel
  * @property {Map<cellNumber, cellValue>} cells
@@ -241,19 +249,19 @@ const judgeBoard = (board) => {
  * @property {boolean} isTheirTurn
  * @property {boolean | null} isWinner
  * @property {string} name
- * @property {uuid} uuid
+ * @property {id} id
  *
  * @typedef {playerModel[]} playersModel
  *
  * @typedef gameModel
  * @property {boardModel} board
  * @property {boolean} hasEnded
+ * @property {id} id
  * @property {playersModel} players
- * @property {uuid} uuid
  *
  * @typedef turnModel
  * @property {cellNumber} cellToClaim
- * @property {uuid} playerUuid
+ * @property {id} playerId
  *
  * @typedef responseFromUpdate
  * @property {gameModel} [game]
