@@ -39,11 +39,15 @@ const toPublicGame = (game, { omitPlayerIds = true, playerId } = {}) => {
 
 	if (omitPlayerIds && !playerId) {
 		delete playerO.id;
+		delete playerO.nextId;
 		delete playerX.id;
+		delete playerX.nextId;
 	} else if (omitPlayerIds && playerId === playerO.id) {
 		delete playerX.id;
+		delete playerX.nextId;
 	} else if (omitPlayerIds && playerId === playerX.id) {
 		delete playerO.id;
+		delete playerO.nextId;
 	}
 
 	return publicGame;
@@ -72,18 +76,21 @@ export const create = () => {
 			winningIndexTrio: null
 		},
 		hasEnded: false,
+		nextId: null,
 		players: [
 			{
 				id: createId(),
 				isTheirTurn: true,
 				isWinner: null,
-				name: 'Player O'
+				name: 'Player O',
+				nextId: null
 			},
 			{
 				id: createId(),
 				isTheirTurn: false,
 				isWinner: null,
-				name: 'Player X'
+				name: 'Player X',
+				nextId: null
 			}
 		],
 		id: createId()
@@ -168,6 +175,11 @@ export const update = (idToUpdate, { cellToClaim, playerId }) => {
 
 	if (hasEndedNow) {
 		game.hasEnded = hasEndedNow;
+		const nextGame = create();
+
+		game.nextId = nextGame.id;
+		game.players[0].nextId = nextGame.players[0].id;
+		game.players[1].nextId = nextGame.players[1].id;
 	}
 
 	if (player && winningIndexTrio?.length) {
@@ -249,6 +261,7 @@ const judgeBoard = (board) => {
  * @property {boolean} isTheirTurn
  * @property {boolean | null} isWinner
  * @property {string} name
+ * @property {id | null} nextId
  * @property {id} id
  *
  * @typedef {playerModel[]} playersModel
@@ -256,6 +269,7 @@ const judgeBoard = (board) => {
  * @typedef gameModel
  * @property {boardModel} board
  * @property {boolean} hasEnded
+ * @property {id | null} nextId
  * @property {id} id
  * @property {playersModel} players
  *
