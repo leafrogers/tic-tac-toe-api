@@ -602,6 +602,28 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 	describe('When the game ends', () => {
 		/**
+		 * @param {object} settings
+		 * @param {gameId} settings.gameId
+		 * @param {playerIdO} settings.playerIdO
+		 * @param {playerIdX} settings.playerIdX
+		 */
+		const playGameStartToFinish = async ({ gameId, playerIdO, playerIdX }) => {
+			for (const turn of [
+				['O', 0],
+				['X', 3],
+				['O', 1],
+				['X', 4],
+				['O', 2]
+			]) {
+				const [player, cellToClaim] = turn;
+				await requestWithApiKey.post(`/api/games/${gameId}/turn`).send({
+					cellToClaim,
+					playerId: player === 'O' ? playerIdO : playerIdX
+				});
+			}
+		};
+
+		/**
 		 * @type {string}
 		 */
 		let gameId;
@@ -626,19 +648,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 		});
 
 		it('includes an array of the winning cell indexes after a win', async () => {
-			for (const turn of [
-				['O', 0],
-				['X', 3],
-				['O', 1],
-				['X', 4],
-				['O', 2]
-			]) {
-				const [player, cellToClaim] = turn;
-				await requestWithApiKey.post(`/api/games/${gameId}/turn`).send({
-					cellToClaim,
-					playerId: player === 'O' ? playerIdO : playerIdX
-				});
-			}
+			await playGameStartToFinish({ gameId, playerIdO, playerIdX });
 
 			const { body } = await requestWithApiKey.get(`/api/games/${gameId}`);
 
@@ -649,19 +659,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 		});
 
 		it('includes winning data after a win', async () => {
-			for (const turn of [
-				['O', 0],
-				['X', 3],
-				['O', 1],
-				['X', 4],
-				['O', 2]
-			]) {
-				const [player, cellToClaim] = turn;
-				await requestWithApiKey.post(`/api/games/${gameId}/turn`).send({
-					cellToClaim,
-					playerId: player === 'O' ? playerIdO : playerIdX
-				});
-			}
+			await playGameStartToFinish({ gameId, playerIdO, playerIdX });
 
 			const { body } = await requestWithApiKey.get(`/api/games/${gameId}`);
 
