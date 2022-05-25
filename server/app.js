@@ -63,6 +63,17 @@ app.post('/api/games/:gameId/turn', express.json(), (req, res, next) => {
 	});
 
 	if (isUpdated) {
+		// if (updatedGame && updatedGame.hasEnded) {
+		//     const { cells } = updatedGame.board || {};
+		//     console.log(
+		//         `
+		//             ${cells[0] || '-'}${cells[1] || '-'}${cells[2] || '-'}
+		//             ${cells[3] || '-'}${cells[4] || '-'}${cells[5] || '-'}
+		//             ${cells[6] || '-'}${cells[7] || '-'}${cells[8] || '-'}
+		//         `
+		//     );
+		// }
+
 		return res.status(200).json({
 			game: updatedGame,
 			status: 200
