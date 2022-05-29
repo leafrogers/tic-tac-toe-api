@@ -62,13 +62,13 @@ No request body is required or supported. The response body will be in JSON form
 		"isTheirTurn": true,
 		"isWinner": null,
 		"name": "Player O",
-		"nextId": null
+		"nextId": null,
 		"id": "11111"
 	}, {
 		"isTheirTurn": false,
 		"isWinner": null,
 		"name": "Player X",
-		"nextId": null
+		"nextId": null,
 		"id": "22222"
 	}],
 }
