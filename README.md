@@ -59,13 +59,13 @@ No request body is required or supported. The response body will be in JSON form
 	"id": "00000",
 	"nextId": null,
 	"players": [{
-		"isTheirTurn": true,
+		"isTurn": true,
 		"isWinner": null,
 		"name": "Player O",
 		"nextId": null,
 		"id": "11111"
 	}, {
-		"isTheirTurn": false,
+		"isTurn": false,
 		"isWinner": null,
 		"name": "Player X",
 		"nextId": null,
@@ -102,12 +102,12 @@ which of the players in the players array is actually them. In other words, send
 	"id": "00000",
 	"nextId": null,
 	"players": [{
-		"isTheirTurn": true,
+		"isTurn": true,
 		"isWinner": null,
 		"name": "Player O",
 		"nextId": null,
 	}, {
-		"isTheirTurn": false,
+		"isTurn": false,
 		"isWinner": null,
 		"name": "Player X",
 		"nextId": null
@@ -129,13 +129,13 @@ which of the players in the players array is actually them. In other words, send
 	"id": "00000",
 	"nextId": null,
 	"players": [{
-		"isTheirTurn": true,
+		"isTurn": true,
 		"isWinner": null,
 		"name": "Player O",
 		"nextId": null
 	}, {
 		"id": "22222",
-		"isTheirTurn": false,
+		"isTurn": false,
 		"isWinner": null,
 		"name": "Player X",
 		"nextId": null
@@ -179,12 +179,12 @@ without having to share new URLs between each other.
 	"id": "00000",
 	"nextId": null,
 	"players": [{
-		"isTheirTurn": false,
+		"isTurn": false,
 		"isWinner": null,
 		"name": "Player O",
 		"nextId": null
 	}, {
-		"isTheirTurn": true,
+		"isTurn": true,
 		"isWinner": null,
 		"name": "Player X"
 		"nextId": null

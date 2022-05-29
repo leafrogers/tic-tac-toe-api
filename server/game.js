@@ -80,14 +80,14 @@ export const create = () => {
 		players: [
 			{
 				id: createId(),
-				isTheirTurn: true,
+				isTurn: true,
 				isWinner: null,
 				name: 'Player O',
 				nextId: null
 			},
 			{
 				id: createId(),
-				isTheirTurn: false,
+				isTurn: false,
 				isWinner: null,
 				name: 'Player X',
 				nextId: null
@@ -153,7 +153,7 @@ export const update = (idToUpdate, { cellToClaim, playerId }) => {
 
 	if (!player) {
 		errorMessages.push('Player not found');
-	} else if (!player.isTheirTurn) {
+	} else if (!player.isTurn) {
 		errorMessages.push('It is not this player’s turn');
 	}
 
@@ -168,8 +168,8 @@ export const update = (idToUpdate, { cellToClaim, playerId }) => {
 	}
 
 	board.cells.set(cellToClaim, playerId === players[0].id ? 'O' : 'X');
-	players[0].isTheirTurn = !players[0].isTheirTurn;
-	players[1].isTheirTurn = !players[1].isTheirTurn;
+	players[0].isTurn = !players[0].isTurn;
+	players[1].isTurn = !players[1].isTurn;
 
 	const { hasEnded: hasEndedNow, winningIndexTrio } = judgeBoard(game.board);
 
@@ -258,7 +258,7 @@ const judgeBoard = (board) => {
  * @property {cellNumber[] | null} winningIndexTrio
  *
  * @typedef playerModel
- * @property {boolean} isTheirTurn
+ * @property {boolean} isTurn
  * @property {boolean | null} isWinner
  * @property {string} name
  * @property {id | null} nextId
