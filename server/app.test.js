@@ -88,14 +88,14 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				players: [
 					{
 						id: expect.stringMatching(idRegEx),
-						isTheirTurn: true,
+						isTurn: true,
 						isWinner: null,
 						name: 'Player O',
 						nextId: null
 					},
 					{
 						id: expect.stringMatching(idRegEx),
-						isTheirTurn: false,
+						isTurn: false,
 						isWinner: null,
 						name: 'Player X',
 						nextId: null
@@ -119,8 +119,8 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				nextId: null,
 				players: [
 					// Player O always starts first
-					{ isTheirTurn: true, isWinner: null, name: 'Player O' },
-					{ isTheirTurn: false, isWinner: null, name: 'Player X' }
+					{ isTurn: true, isWinner: null, name: 'Player O' },
+					{ isTurn: false, isWinner: null, name: 'Player X' }
 				]
 			};
 
@@ -136,10 +136,10 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				.set('Player-ID', playerIdX);
 
 			const expectedPlayers = [
-				{ isTheirTurn: true, isWinner: null, name: 'Player O' },
+				{ isTurn: true, isWinner: null, name: 'Player O' },
 				{
 					id: playerIdX,
-					isTheirTurn: false,
+					isTurn: false,
 					isWinner: null,
 					name: 'Player X',
 					nextId: null
@@ -694,13 +694,13 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				players: [
 					{
 						id: nextPlayerId,
-						isTheirTurn: true,
+						isTurn: true,
 						isWinner: null,
 						name: 'Player O',
 						nextId: null
 					},
 					{
-						isTheirTurn: false,
+						isTurn: false,
 						isWinner: null,
 						name: 'Player X'
 					}
@@ -730,13 +730,13 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				nextId: null,
 				players: [
 					{
-						isTheirTurn: true,
+						isTurn: true,
 						isWinner: null,
 						name: 'Player O'
 					},
 					{
 						id: nextPlayerId,
-						isTheirTurn: false,
+						isTurn: false,
 						isWinner: null,
 						name: 'Player X',
 						nextId: null
