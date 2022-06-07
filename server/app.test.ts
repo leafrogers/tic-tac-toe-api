@@ -1,9 +1,17 @@
-// eslint-disable-next-line node/no-extraneous-import
-import { jest } from '@jest/globals';
-import nock from 'nock';
-import supertest from 'supertest';
-import config from '../config.js';
-import app from './app.js';
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	it
+} from 'https://deno.land/std@0.142.0/testing/bdd.ts';
+import { assertEquals } from 'https://deno.land/std@0.142.0/testing/asserts.ts';
+
+import nock from 'https://dev.jspm.io/nock';
+import supertest from 'https://dev.jspm.io/supertest';
+import config from '../config.ts';
+import app from './app.ts';
 
 const requestWithApiKey = supertest.agent(app);
 
@@ -14,10 +22,6 @@ const requestWithBadApiKey = supertest.agent(app);
 const idRegEx = /[a-zA-Z0-9]{5}/;
 
 requestWithBadApiKey.set('API-Key', 'beep-boop');
-
-jest.spyOn(global.console, 'info').mockImplementation(() => {});
-jest.spyOn(global.console, 'warn').mockImplementation(() => {});
-jest.spyOn(global.console, 'error').mockImplementation(() => {});
 
 describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 	beforeAll(() => {
@@ -32,29 +36,29 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 	describe('Authentication and authorization', () => {
 		it('doesn’t allow calls that omit an API key', async () => {
 			const { status } = await requestWithNoApiKey.post('/api/games');
-			expect(status).toBe(401);
+			assertEquals(status, 401);
 		});
 
 		it('doesn’t allow calls that include a bad API key', async () => {
 			const { status } = await requestWithBadApiKey.post('/api/games');
-			expect(status).toBe(403);
+			assertEquals(status, 403);
 		});
 	});
 
 	describe('Missing routes', () => {
 		it('responds with a 404 for a nonsense route', async () => {
 			const { status } = await requestWithApiKey.get('/i/am/not/here');
-			expect(status).toBe(404);
+			assertEquals(status, 404);
 		});
 
 		it('responds with a 404 for a non-existent game', async () => {
 			const { status } = await requestWithApiKey.get('/api/games/00000');
-			expect(status).toBe(404);
+			assertEquals(status, 404);
 		});
 
 		it('responds with a 404 when attempting a turn on an non-existent game', async () => {
 			const { status } = await requestWithApiKey.post('/api/games/00000/turn');
-			expect(status).toBe(404);
+			assertEquals(status, 404);
 		});
 	});
 
@@ -73,11 +77,11 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 		});
 
 		it('responds with a 201 on success', async () => {
-			expect(response.status).toBe(201);
+			assertEquals(response.status, 201);
 		});
 
 		it('responds with a full game model on success', async () => {
-			expect(response.body.game).toEqual({
+			assertEquals(response.body.game, {
 				board: {
 					cells: ['', '', '', '', '', '', '', '', ''],
 					winningIndexTrio: null
@@ -124,7 +128,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				]
 			};
 
-			expect(body.game).toEqual(expectedModel);
+			assertEquals(body.game, expectedModel);
 		});
 
 		// This lets API clients validate a player ID, as well as identify
@@ -146,7 +150,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				}
 			];
 
-			expect(body.game.players).toEqual(expectedPlayers);
+			assertEquals(body.game.players, expectedPlayers);
 		});
 	});
 
@@ -180,7 +184,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				.post(`/api/games/${gameId}/turn`)
 				.send({ cellToClaim: 0, playerId: playerIdO });
 
-			expect(status).toBe(200);
+			assertEquals(status, 200);
 		});
 
 		it('serves the updated game in the response body', async () => {
@@ -188,7 +192,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				.post(`/api/games/${gameId}/turn`)
 				.send({ cellToClaim: 0, playerId: playerIdO });
 
-			expect(body.game.board.cells).toEqual([
+			assertEquals(body.game.board.cells, [
 				'O',
 				'',
 				'',
@@ -208,7 +212,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 			const { body } = await requestWithApiKey.get(`/api/games/${gameId}`);
 
-			expect(body.game.board.cells).toEqual([
+			assertEquals(body.game.board.cells, [
 				'O',
 				'',
 				'',
@@ -235,7 +239,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 			const { body } = await requestWithApiKey.get(`/api/games/${gameId}`);
 
-			expect(body.game.board.cells).toEqual([
+			assertEquals(body.game.board.cells, [
 				'O',
 				'',
 				'X',
@@ -282,7 +286,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 					.post(`/api/games/${gameId}/turn`)
 					.send({ pineapple: 1 });
 
-				expect(status).toBe(400);
+				assertEquals(status, 400);
 			});
 
 			it('responds with a message that includes the reason for rejection', async () => {
@@ -290,7 +294,8 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 					.post(`/api/games/${gameId}/turn`)
 					.send({ pineapple: 1 });
 
-				expect(body.message).toEqual(
+				assertEquals(
+					body.message,
 					'Player not found; cellToClaim should be a number from 0 through 8'
 				);
 			});
@@ -306,7 +311,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 					.post(`/api/games/${gameId}/turn`)
 					.send({ cellToClaim: 1, playerId: playerIdO });
 
-				expect(status).toBe(400);
+				assertEquals(status, 400);
 			});
 
 			it('responds with a message that includes the reason for rejection', async () => {
@@ -318,7 +323,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 					.post(`/api/games/${gameId}/turn`)
 					.send({ cellToClaim: 1, playerId: playerIdO });
 
-				expect(body.message).toBe('It is not this player’s turn');
+				assertEquals(body.message, 'It is not this player’s turn');
 			});
 		});
 
@@ -331,7 +336,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: '00000'
 					});
 
-				expect(status).toBe(400);
+				assertEquals(status, 400);
 			});
 
 			it('responds with a message that includes the reason for rejection', async () => {
@@ -342,7 +347,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: '00000'
 					});
 
-				expect(body.message).toBe('Player not found');
+				assertEquals(body.message, 'Player not found');
 			});
 		});
 
@@ -355,7 +360,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: playerIdO
 					});
 
-				expect(status).toBe(400);
+				assertEquals(status, 400);
 			});
 
 			it('responds with a message that includes the reason for rejection', async () => {
@@ -366,7 +371,8 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: playerIdO
 					});
 
-				expect(body.message).toBe(
+				assertEquals(
+					body.message,
 					'cellToClaim should be a number from 0 through 8'
 				);
 			});
@@ -386,7 +392,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: playerIdX
 					});
 
-				expect(status).toBe(400);
+				assertEquals(status, 400);
 			});
 
 			it('responds with a message that includes the reason for rejection', async () => {
@@ -402,7 +408,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: playerIdX
 					});
 
-				expect(body.message).toBe('This cell has already been claimed');
+				assertEquals(body.message, 'This cell has already been claimed');
 			});
 		});
 
@@ -429,7 +435,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: playerIdX
 					});
 
-				expect(status).toBe(400);
+				assertEquals(status, 400);
 			});
 
 			it('responds with a message that includes the reason for rejection', async () => {
@@ -454,7 +460,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: playerIdX
 					});
 
-				expect(body.message).toBe('This game has already ended');
+				assertEquals(body.message, 'This game has already ended');
 			});
 		});
 
@@ -481,7 +487,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: playerIdX
 					});
 
-				expect(status).toBe(400);
+				assertEquals(status, 400);
 			});
 
 			it('responds with a message that includes the reason for rejection', async () => {
@@ -506,7 +512,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: playerIdX
 					});
 
-				expect(body.message).toBe('This game has already ended');
+				assertEquals(body.message, 'This game has already ended');
 			});
 		});
 
@@ -533,7 +539,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: playerIdX
 					});
 
-				expect(status).toBe(400);
+				assertEquals(status, 400);
 			});
 
 			it('responds with a message that includes the reason for rejection', async () => {
@@ -558,7 +564,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: playerIdX
 					});
 
-				expect(body.message).toBe('This game has already ended');
+				assertEquals(body.message, 'This game has already ended');
 			});
 		});
 
@@ -579,7 +585,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: playerIdX
 					});
 
-				expect(status).toBe(400);
+				assertEquals(status, 400);
 			});
 
 			it('responds with a message that includes the reason for rejection', async () => {
@@ -598,7 +604,8 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 						playerId: playerIdX
 					});
 
-				expect(body.message).toBe(
+				assertEquals(
+					body.message,
 					'This game has already ended; This cell has already been claimed'
 				);
 			});
@@ -657,7 +664,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 			const { body } = await requestWithApiKey.get(`/api/games/${gameId}`);
 
-			expect(body.game.board).toEqual({
+			assertEquals(body.game.board, {
 				cells: ['O', 'O', 'O', 'X', 'X', '', '', '', ''],
 				winningIndexTrio: [0, 1, 2]
 			});
@@ -668,7 +675,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 			const { body } = await requestWithApiKey.get(`/api/games/${gameId}`);
 
-			expect(body.game.players[0].isWinner).toBe(true);
+			assertEquals(body.game.players[0].isWinner, true);
 		});
 
 		it('produces a new game and shares a player-specific URL for player O', async () => {
@@ -684,7 +691,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				.get(`/api/games/${nextGameId}`)
 				.set('Player-ID', nextPlayerId);
 
-			expect(newBody.game).toEqual({
+			assertEquals(newBody.game, {
 				board: {
 					cells: ['', '', '', '', '', '', '', '', ''],
 					winningIndexTrio: null
@@ -721,7 +728,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 				.get(`/api/games/${nextGameId}`)
 				.set('Player-ID', nextPlayerId);
 
-			expect(newBody.game).toEqual({
+			assertEquals(newBody.game, {
 				board: {
 					cells: ['', '', '', '', '', '', '', '', ''],
 					winningIndexTrio: null
@@ -772,7 +779,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 			const { status } = await requestWithApiKey.delete(`/api/games/${gameId}`);
 
-			expect(status).toEqual(204);
+			assertEquals(status, 204);
 		});
 
 		it('deletes a game if not in production', async () => {
@@ -781,7 +788,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 			await requestWithApiKey.delete(`/api/games/${gameId}`);
 			const { status } = await requestWithApiKey.get(`/api/games/${gameId}`);
 
-			expect(status).toEqual(404);
+			assertEquals(status, 404);
 		});
 
 		it('doesn’t serve a delete route if in production', async () => {
@@ -789,7 +796,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 			const { status } = await requestWithApiKey.delete(`/api/games/${gameId}`);
 
-			expect(status).toEqual(405);
+			assertEquals(status, 405);
 		});
 
 		it('doesn’t delete a game if in production', async () => {
@@ -799,7 +806,7 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 			const { status } = await requestWithApiKey.get(`/api/games/${gameId}`);
 
-			expect(status).toEqual(200);
+			assertEquals(status, 200);
 		});
 	});
 });
