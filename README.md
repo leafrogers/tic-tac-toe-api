@@ -153,7 +153,6 @@ without having to share new URLs between each other.
 
 #### Example request
 
-
 ```json
 {
 	"cellToClaim": 3,
@@ -206,7 +205,8 @@ Steps:
 
 - Clone this repo to a local directory
 - In your terminal, navigate to the directory and run `npm install`
-- After that’s finished, run `npm start`
+- After that’s finished, run `API_KEYS=dev-key npm start`. This will mean that for any requests you
+  make to this locally-running API, you’ll need to include an `API-Key` header with the value `dev-key`.
 - Using the URL that’s logged in the console output, you should be able to make requests via something like Postman, Insomnia, cURL, or similar tools.
 
 ## :information_source: Technical constraints
@@ -223,4 +223,3 @@ please [raise an issue](https://github.com/leafrogers/tic-tac-toe-api/issues).
 ## Licence
 
 This software is published by the Leaf Rogers under the [MIT licence](http://opensource.org/licenses/MIT).
- 
