@@ -129,11 +129,11 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 
 		// This lets API clients validate a player ID, as well as identify
 		// when it’s a player’s turn next
-		it('retrieves a game and includes a player ID if it matches with a header', async () => {
+		it('retrieves a game and includes a player ID if it matches with a given query parameter', async () => {
 			const playerIdX = response.body.game.players[1].id;
-			const { body } = await requestWithApiKey
-				.get(`/api/games/${response.body.game.id}`)
-				.set('Player-ID', playerIdX);
+			const { body } = await requestWithApiKey.get(
+				`/api/games/${response.body.game.id}?playerId=${playerIdX}`
+			);
 
 			const expectedPlayers = [
 				{ isTurn: true, isWinner: null, name: 'Player O' },
@@ -674,15 +674,15 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 		it('produces a new game and shares a player-specific URL for player O', async () => {
 			await playGameStartToFinish({ gameId, playerIdO, playerIdX });
 
-			const { body } = await requestWithApiKey
-				.get(`/api/games/${gameId}`)
-				.set('Player-ID', playerIdO);
+			const { body } = await requestWithApiKey.get(
+				`/api/games/${gameId}?playerId=${playerIdO}`
+			);
 
 			const nextGameId = body.game.nextId;
 			const nextPlayerId = body.game.players[0].nextId;
-			const { body: newBody } = await requestWithApiKey
-				.get(`/api/games/${nextGameId}`)
-				.set('Player-ID', nextPlayerId);
+			const { body: newBody } = await requestWithApiKey.get(
+				`/api/games/${nextGameId}?playerId=${nextPlayerId}`
+			);
 
 			expect(newBody.game).toEqual({
 				board: {
@@ -712,14 +712,14 @@ describe(`The ${config.APP_FRIENDLY_NAME} app`, () => {
 		it('produces a new game and shares a player-specific URL for player X', async () => {
 			await playGameStartToFinish({ gameId, playerIdO, playerIdX });
 
-			const { body } = await requestWithApiKey
-				.get(`/api/games/${gameId}`)
-				.set('Player-ID', playerIdX);
+			const { body } = await requestWithApiKey.get(
+				`/api/games/${gameId}?playerId=${playerIdX}`
+			);
 			const nextGameId = body.game.nextId;
 			const nextPlayerId = body.game.players[1].nextId;
-			const { body: newBody } = await requestWithApiKey
-				.get(`/api/games/${nextGameId}`)
-				.set('Player-ID', nextPlayerId);
+			const { body: newBody } = await requestWithApiKey.get(
+				`/api/games/${nextGameId}?playerId=${nextPlayerId}`
+			);
 
 			expect(newBody.game).toEqual({
 				board: {
