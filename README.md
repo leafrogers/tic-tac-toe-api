@@ -1,6 +1,6 @@
 # Tic-tac-toe API
 
-[![CircleCI](https://circleci.com/gh/leafrogers/tic-tac-toe-api.svg?style=svg)](https://circleci.com/gh/leafrogers/tic-tac-toe-api)
+[![CircleCI](https://circleci.com/gh/leafrogers/tic-tac-toe-api.svg?style=shield)](https://circleci.com/gh/leafrogers/tic-tac-toe-api) [![deploy main](https://github.com/leafrogers/tic-tac-toe-api/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/leafrogers/tic-tac-toe-api/actions/workflows/main.yml)
 
 An API for creating and managing games of Tic-tac-toe.
 
