@@ -83,12 +83,12 @@ both players’ IDs!
 ### `GET /api/games/:gameId`
 
 Send a GET request to `/api/games/:gameId` to receive the current state of your Tic-tac-toe game.
-Accepts an optional header, `Player-ID`, if you want to include the ID of a player in the
+Accepts an optional query parameter, `playerId`, if you want to include the ID of a player in the
 response. This header is useful for inferring the state of a player, for example: if you want to
 serve an HTML page to the player, in order to infer if it’s their turn in the game, you need to know
-which of the players in the players array is actually them. In other words, sending the `Player-ID` header lets you identify a player within the response’s players array.
+which of the players in the players array is actually them. In other words, sending the `playerId=abc` query parameter lets you identify a player within the response’s players array.
 
-#### Example response of a request with no optional `Player-ID` header
+#### Example response of a request with no optional `playerId` query parameter
 
 `200 OK`
 
@@ -115,7 +115,7 @@ which of the players in the players array is actually them. In other words, send
 }
 ```
 
-#### Example response of a request with a `Player-ID` header of `22222`
+#### Example response of a request with a `playerId` query parameter of `22222`
 
 `200 OK`
 
@@ -148,7 +148,7 @@ which of the players in the players array is actually them. In other words, send
 Calls to `/api/games/:gameId/turn` will change the state of the game board by taking the requested player’s turn in the game. Requests must include a `Content-Type` header with a value of `application/json`. If a successful response is returned, it will then be the other player’s turn unless you win, or there are no more spaces left on the board.
 
 :information_source: When a game ends, a new game is created automatically and its IDs are shared in
-any subsequent responses via a `nextId` property, with the same mechanism in place that omits player IDs unless you specify one with a `Player-ID` header in the request. This approach of perpetually creating subsequent games makes it possible for two players to continue playing each other across multiple games,
+any subsequent responses via a `nextId` property, with the same mechanism in place that omits player IDs unless you specify one with a `playerId` query parameter in the request. This approach of perpetually creating subsequent games makes it possible for two players to continue playing each other across multiple games,
 without having to share new URLs between each other.
 
 #### Example request

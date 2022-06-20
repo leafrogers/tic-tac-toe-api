@@ -25,8 +25,14 @@ app.post('/api/games', (_req, res) => {
 });
 
 app.get('/api/games/:gameId', (req, res, next) => {
-	const playerId = req.get('Player-ID');
-	const game = readGame(req.params.gameId, { playerId });
+	const { playerId } = req.query;
+	const options = {};
+
+	if (typeof playerId === 'string') {
+		options.playerId = playerId;
+	}
+
+	const game = readGame(req.params.gameId, options);
 
 	if (game) {
 		return res.status(200).json({ game, status: 200 });
